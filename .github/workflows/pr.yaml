@@ -10,4 +10,14 @@ jobs:
       - name: List repo contents
         run: |
           ls -lah ${{ github.workspace }}
-
+      - name: Set up kwokctl
+        uses: kubernetes-sigs/kwok@main
+        with:
+          command: kwokctl
+      - run: kwokctl create cluster
+        env:
+          KWOK_KUBE_VERSION: v1.32.0
+      - run: |
+          kubectl create namespace test
+          kubectl run -n test sleep --image busybox --command sleep -- 3600
+      - run: kubectl get pods -n test -ojson | jq '.items[0].metadata.name == "sleep"'
